@@ -39,8 +39,13 @@ download_release() {
   filename="$2"
   arch="$3"
   platform="$4"
+  toolchain="$5"
 
-  url="$GH_REPO/releases/download/v${version}/router-${version}-${arch}-${platform}.tar.gz"
+  if [ -z "$toolchain" ]; then
+    url="$GH_REPO/releases/download/v${version}/router-${version}-${arch}-${platform}.tar.gz"
+  else
+    url="$GH_REPO/releases/download/v${version}/router-v${version}-${arch}-${platform}-${toolchain}.tar.gz"
+  fi
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"

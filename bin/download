@@ -34,6 +34,42 @@ get_arch() {
 }
 
 get_platform() {
+  local plat
+  plat=$(uname | tr '[:upper:]' '[:lower:]')
+  case ${plat} in
+  darwin)
+    plat='apple'
+    ;;
+  linux)
+    plat='unknown-linux'
+    ;;
+  windows)
+    plat='pc-windows'
+    ;;
+  esac
+
+  echo "${plat}"
+}
+
+get_toolchain() {
+  local tchain
+  tchain=$(uname | tr '[:upper:]' '[:lower:]')
+  case ${tchain} in
+  darwin) ;;
+
+  linux)
+    tchain='gnu'
+    ;;
+  windows)
+    tchain='msvc'
+    ;;
+  esac
+
+  echo "${tchain}"
+}
+
+get_platform_pre_v1() {
+  local plat
   plat=$(uname | tr '[:upper:]' '[:lower:]')
   case ${plat} in
   darwin)
@@ -55,8 +91,15 @@ get_platform() {
 }
 
 arch="$(get_arch)"
-platform="$(get_platform)"
-download_release "$ASDF_INSTALL_VERSION" "$release_file" "$arch" "$platform"
+
+if [[ "$ASDF_INSTALL_VERSION" == 0.* ]]; then
+  platform="$(get_platform_pre_v1)"
+  download_release "$ASDF_INSTALL_VERSION" "$release_file" "$arch" "$platform" ""
+else
+  platform="$(get_platform)"
+  toolchain="$(get_toolchain)"
+  download_release "$ASDF_INSTALL_VERSION" "$release_file" "$arch" "$platform" "$toolchain"
+fi
 
 #  Extract contents of tar.gz file into the download directory
 tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" --strip-components=1 || fail "Could not extract $release_file"
